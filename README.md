@@ -45,6 +45,7 @@ Setup
 * Clone, download, or copy-paste the file ghostredir.awk
 
 	cd ~
+
 	git clone 'https://github.com/greencardamom/Ghostredir'
 
 * Set the file executable
