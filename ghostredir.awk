@@ -81,7 +81,7 @@ BEGIN {
 #
 # Get the redir target URL from the Wayback redir page
 #
-function getredir(srd) {
+function getredir(srd,  command,ci,f,i,a,t,j) {
 
   command = "curl -ILs " shquote(srd)
 
