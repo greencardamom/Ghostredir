@@ -13,13 +13,9 @@
 #  That leads to the destination URL:
 #    http://www.ew.com/article/1998/12/04/twelve-songs-christmas
 
-#
-# Dependencies: GNU awk, wget, curl
-#
-
 # The MIT License (MIT)
 #
-# Copyright (c) 2024 by User:GreenC (at en.wikipedia.org)
+# Copyright (c) 2025 by User:GreenC (at en.wikipedia.org)
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -70,7 +66,7 @@ BEGIN {
     grd = getredir(srd)
     if(!empty(grd)) {
       if(G["debug"])
-        stdErr("Final result: " grd)
+        debug("Final result: " grd)
       else
         print grd
     }
@@ -85,21 +81,18 @@ function getredir(srd,  command,ci,f,i,a,t,j) {
 
   command = "curl -ILs " shquote(srd)
 
-  if(G["debug"])
-    stdErr(command)
+  debug(command)
 
   for(ci = 0; ci <= int(G["retry"]); ci++) {
 
     if(ci == G["retry"]) { 
-      if(G["debug"])
-        stdErr("getredir max retries reached")
+      debug("getredir max retries reached")
       exit
     }
 
     f = sys2var(command)
 
-    if(G["debug"])
-      stdErr("getredir attempt " ci)
+    debug("getredir attempt " ci)
 
     if(length(f) > 5) 
       break
@@ -109,17 +102,16 @@ function getredir(srd,  command,ci,f,i,a,t,j) {
 
   for(i=0; i <= splitn(f, a, i); i++) { 
     if(a[i] ~ /^[ ]*[Ll]ocation:/) {
-      sub("^[ ]*[Ll]ocation:[ ]*https?://web[.]archive[.]org/web/[0-9]{14}(id_)?/", "", a[i])
-      t[++j] = a[i]
+      sub("^[ ]*[Ll]ocation:[ ]*(https?://web[.]archive[.]org)?/web/[0-9]{14}(id_)?/", "", a[i])
+      if(a[i] !~ "/web/[0-9]{14}")
+        t[++j] = a[i]
     } 
   }
 
   if(!empty(t[j])) 
     return t[j]
-  else {
-    if(G["debug"])
-      stdErr("getredir none found")
-  }
+  else 
+    debug("getredir none found")
 
 }
 
@@ -130,21 +122,18 @@ function searchredir(  command,ci,f,i,a,b,t,j,result) {
 
   command = "wget -q -O- " shquote("https://web.archive.org/cdx/search/cdx?url=" G["url"] "&MatchType=prefix")
 
-  if(G["debug"])
-    stdErr(command)
+  debug(command)
 
   for(ci = 0; ci <= int(G["retry"]); ci++) {
 
     if(ci == G["retry"]) { 
-      if(G["debug"])
-        stdErr("searchredir max retries reached")
+      debug("searchredir max retries reached")
       exit
     }
 
     f = sys2var(command)
 
-    if(G["debug"])
-      stdErr("searchredir attempt " ci)
+    debug("searchredir attempt " ci)
 
     if(length(f) > 5) 
       break
@@ -153,7 +142,7 @@ function searchredir(  command,ci,f,i,a,b,t,j,result) {
   }
 
   for(i=0; i <= splitn(f, a, i); i++) { 
-    if(a[i] ~ /text\/html 30[12]/) {
+    if(a[i] ~ / 30[12]/) {
       split(a[i], b, " ")
       t[++j] = b[2] 
     } 
@@ -161,13 +150,11 @@ function searchredir(  command,ci,f,i,a,b,t,j,result) {
 
   if(t[j] ~ /[0-9]{14}/) {
     result = "https://web.archive.org/web/" t[j] "/" G["url"]
-    if(G["debug"])
-      stdErr("searchredir result: " result)
+    debug("searchredir result: " result)
     return result
   }
 
-  if(G["debug"])
-    stdErr("searchredir result: none found")
+  debug("searchredir result: none found")
 
 }
 
@@ -450,3 +437,7 @@ function getopt(argc, argv, options,    thisopt, i) {
     return thisopt
 }
 
+function debug(s) {
+  if(G["debug"])
+    stdErr(s)
+}
