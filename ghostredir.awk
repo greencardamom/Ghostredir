@@ -120,7 +120,7 @@ function getredir(srd,  command,ci,f,i,a,t,j) {
 #
 function searchredir(  command,ci,f,i,a,b,t,j,result) {
 
-  command = "wget -q -O- " shquote("https://web.archive.org/cdx/search/cdx?url=" G["url"] "&MatchType=prefix")
+  command = "wget -q -O- " shquote("https://web.archive.org/cdx/search/cdx?url=" encode(G["url"]) "&MatchType=prefix")
 
   debug(command)
 
@@ -177,6 +177,15 @@ function help() {
 
 }
 
+#
+# Encode ? and &
+#
+function encode(s) {
+  gsub(/[?]/, "%3F", s)
+  gsub(/[&]/, "%26", s)
+  return s
+
+}
 
 # ----- Functions from library.awk in BotWikiAwk https://github.com/greencardamom/BotWikiAwk ----------------
 
